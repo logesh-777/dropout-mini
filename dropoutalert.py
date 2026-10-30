@@ -1632,22 +1632,22 @@ def bootstrap(app):
     if os.environ.get("SEED_DEMO") == "1" and not Student.query.count():
         seed_demo_data(app)
 
-        # Automatic seed for admin@gmail.com on startup
-    if not User.query.filter_by(email='admin@gmail.com').first():
-        admin = User(
+        # Ensure admin@gmail.com exists and has admin role on startup
+    admin_user = User.query.filter_by(email='admin@gmail.com').first()
+    if not admin_user:
+        admin_user = User(
             email='admin@gmail.com',
             password_hash=generate_password_hash('Logesh123'),
             name='Logesh',
-            role='student',
+            role='admin',
             active=True
         )
-        db.session.add(admin)
+        db.session.add(admin_user)
         db.session.commit()
-    else:
-        if admin_user.role != 'admin' or admin_user.student_id is not None:
-            admin_user.role = 'admin'
-            admin_user.student_id = None
-            db.session.commit()
+    elif admin_user.role != 'admin' or admin_user.student_id is not None:
+        admin_user.role = 'admin'
+        admin_user.student_id = None
+        db.session.commit()
 
 
 
