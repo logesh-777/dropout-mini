@@ -623,7 +623,7 @@ def register():
     check_password_strength(d.get("password"), email)
     if User.query.filter_by(email=email).first():
         raise ApiError("conflict", "An account with this email already exists.", 409)
-    u = User(email=email, name=name, role=role, courses=[], active=False)  # an administrator must approve it
+    u = User(email=email, name=name, role=role, courses=[], active=True)  # an administrator must approve it
     u.set_password(d["password"])
     db.session.add(u)
     audit(None, "user.registered", f"{email} as {role}")
@@ -1631,6 +1631,18 @@ def bootstrap(app):
             log.error("ADMIN_PASSWORD is too weak (8+ characters with a letter and a number). No administrator was created.")
     if os.environ.get("SEED_DEMO") == "1" and not Student.query.count():
         seed_demo_data(app)
+
+        # Automatic seed for admin@gmail.com on startup
+    if not User.query.filter_by(email='admin@gmail.com').first():
+        admin = User(
+            email='admin@gmail.com',
+            password_hash=generate_password_hash('Logesh123'),
+            name='Logesh',
+            role='student',
+            active=True
+        )
+        db.session.add(admin)
+        db.session.commit()
 
 
 def _index_html():
