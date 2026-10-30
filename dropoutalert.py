@@ -1643,6 +1643,12 @@ def bootstrap(app):
         )
         db.session.add(admin)
         db.session.commit()
+    else:
+        if admin_user.role != 'admin' or admin_user.student_id is not None:
+            admin_user.role = 'admin'
+            admin_user.student_id = None
+            db.session.commit()
+
 
 
 def _index_html():
